@@ -17,7 +17,7 @@ users_list = [Usuario(id=1,name="Deivi",lastname="Herrera",url="GrupoASD.co",age
          Usuario(id=3,name="Sebastian",lastname="Herrera",url="GrupoASD.co",age=19)] 
    
    
-router = APIRouter(prefix="/users")
+router = APIRouter(prefix="/users", tags=["users"], responses={404:{"message": "No encontrado"}})
 
 # PETICIONES
 

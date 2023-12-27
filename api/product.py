@@ -4,7 +4,7 @@ from pydantic import BaseModel
 # Entidad de usuarios
 
    
-router = APIRouter(prefix="/products")
+router = APIRouter(prefix="/products", tags=["products"],responses={404: {"message":"No encontrado"}} )
 
 # PETICIONES
 
