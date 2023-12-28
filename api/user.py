@@ -1,11 +1,27 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException,Depends
 from models.user import User
 from db.client import db_client
 from services.user import *
+from passlib.context import CryptContext
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import jwt, JWTError
+from datetime import datetime, timedelta
+
 
 router = APIRouter(prefix="/users", tags=["users"], responses={404:{"message": "No encontrado"}})
 
 exception = HTTPException(status_code=400, detail="ERROR")
+
+ALGORITH = "HS256"
+ACCESS_TOKEN_DURATION = 1
+SECRET = "aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899"
+
+
+oauth2 = OAuth2PasswordBearer(tokenUrl="login",)
+
+crypt = CryptContext(schemes=["bcrypt"]) 
+
+
 
 @router.get("/list")
 async def users():
@@ -42,5 +58,46 @@ async def deleteUser(id: str):
         return {"Error":"No se pudo borrar el usuario"}
 
 
+# @app.post("/token")
+# async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
+#     user_dict = fake_users_db.get(form_data.username)
+#     if not user_dict:
+#         raise HTTPException(status_code=400, detail="Incorrect username or password")
+#     user = UserInDB(**user_dict)
+#     hashed_password = fake_hash_password(form_data.password)
+#     if not hashed_password == user.hashed_password:
+#         raise HTTPException(status_code=400, detail="Incorrect username or password")
 
+#     return {"access_token": user.username, "token_type": "bearer"}
+# LOGIN 
+    
+@router.post("/login")
+async def login(form: OAuth2PasswordRequestForm = Depends()):
+    
+    user = buscarUsuario(form.username)
+    print("Usuario", user)
+
+    verificar = crypt.verify(form.password, user["password"])
+
+    print(verificar)
+
+    if not verificar:
+        raise HTTPException(status_code=400, detail="La contraseña no es la correcta")
+
+    access_token_expiration = timedelta(hours=ACCESS_TOKEN_DURATION)
+
+    expire = datetime.utcnow() + access_token_expiration
+
+    access_token = {"sub": user["name"], "exp": expire} 
+
+    return {"access_token": jwt.encode(access_token, SECRET, algorithm=ALGORITH),"token_type":"bearer"}
+
+@router.post("/prueba")
+async def auth_user(token: str = Depends(oauth2)):
+    print(token)
+    username = jwt.decode(token, SECRET, algorithms=ALGORITH).get("sub")
+    return username
+
+
+        
 

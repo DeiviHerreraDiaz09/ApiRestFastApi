@@ -1,7 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, constr
 
 class User(BaseModel):
     id: str | None = None
-    name: str
-    lastname: str
+    name: constr(min_length=1, max_length=50)
+    lastname: constr(min_length=1, max_length=50)
     age: int
+    password: str
