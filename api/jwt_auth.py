@@ -45,14 +45,14 @@ users_db = {
     }
 }
 
-
-
 def buscarUsuario(username: str):
     if username in users_db:
         return UserDB(**users_db[username])
 
 async def auth_user(token: str = Depends(oauth2)):
+    
     exception = HTTPException(status_code=401, detail="Credenciales de autorización invalidas", headers={"WWW-Authenticate": "Bearer"})
+    
     try:
         username = jwt.decode(token, SECRET, algorithms=ALGORITH).get("sub")
         if username is None:
