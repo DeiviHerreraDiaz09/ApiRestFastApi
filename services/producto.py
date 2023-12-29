@@ -46,7 +46,14 @@ def actualizar_producto(id: str, producto: Producto):
         return actualizar
     else: 
         return None
+    
 
+def borrar_producto(id: str):
+    producto_borrar = db_client.productos.delete_one({"_id": ObjectId(id)})
+    if producto_borrar: 
+        return "Usuario borrado con exito"
+    else: 
+        return "No se encontró el producto"
     
 
     

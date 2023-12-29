@@ -15,20 +15,30 @@ async def products():
         raise HTTPException(status_code=400, detail="Identificador incorrecto")
     return lista
 
-@router.post("/add")
-async def addProducto(producto: Producto):
-    nuevo_producto = guardar_producto(producto)
-    return nuevo_producto
-
 @router.get("/{id}")
 async def productoId(id: str):
     producto = listar_producto(id)
     return producto
 
+@router.post("/add")
+async def addProducto(producto: Producto):
+    nuevo_producto = guardar_producto(producto)
+    return nuevo_producto
+
 @router.put("/update/{id}")
-async def updateUser(id: str, producto: Producto):
+async def updateProducto(id: str, producto: Producto):
     resultado_actualizacion = actualizar_producto(id, producto)
     if resultado_actualizacion:
         return {"success": resultado_actualizacion.modified_count > 0}
     else:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+@router.delete("/delete/{id}")
+async def deleteProducto(id: str):
+    usuario = borrar_producto(id)
+
+    if usuario: 
+        return {"Success":"Borrado exitosamente"}
+    else:
+        return {"Error":"No se pudo borrar el producto"}
+
