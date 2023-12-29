@@ -21,11 +21,20 @@ oauth2 = OAuth2PasswordBearer(tokenUrl="login",)
 
 crypt = CryptContext(schemes=["bcrypt"]) 
 
+# Autentificador
 
+async def auth_user(token: str = Depends(oauth2)):
+    print(token)
+    username = jwt.decode(token, SECRET, algorithms=ALGORITH).get("sub")
+    return username
 
 @router.get("/list")
-async def users():
+async def users(current_user: str = Depends(auth_user)):
     lista = listar_usuarios()
+
+    if not lista: 
+        raise HTTPException(status_code=400, detail="Identificador incorrecto")
+
     return lista
 
 @router.get("/{id}")
@@ -41,35 +50,23 @@ async def addUser(user: User):
     nuevo_usuario = guardar_user(user)
     return nuevo_usuario
 
-@router.put("/update")
-async def updateUser(user: User):
-    usuario = actualizar_usuario(user)
-    if usuario:
-        return "Usuario actualizado", usuario
-    else:
-        return exception
 
-@router.delete("/delete")
+@router.put("/update/{id}")
+async def updateUser(id: str, user: User):
+    resultado_actualizacion = actualizar_usuario(id, user)
+    if resultado_actualizacion:
+        return {"success": resultado_actualizacion.modified_count > 0}
+    else:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+
+@router.delete("/delete/{id}")
 async def deleteUser(id: str):    
     usuario = borrar_usuario(id)
     if usuario: 
         return {"Success":"Borrado exitosamente"}
     else: 
         return {"Error":"No se pudo borrar el usuario"}
-
-
-# @app.post("/token")
-# async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
-#     user_dict = fake_users_db.get(form_data.username)
-#     if not user_dict:
-#         raise HTTPException(status_code=400, detail="Incorrect username or password")
-#     user = UserInDB(**user_dict)
-#     hashed_password = fake_hash_password(form_data.password)
-#     if not hashed_password == user.hashed_password:
-#         raise HTTPException(status_code=400, detail="Incorrect username or password")
-
-#     return {"access_token": user.username, "token_type": "bearer"}
-# LOGIN 
     
 @router.post("/login")
 async def login(form: OAuth2PasswordRequestForm = Depends()):
@@ -92,11 +89,7 @@ async def login(form: OAuth2PasswordRequestForm = Depends()):
 
     return {"access_token": jwt.encode(access_token, SECRET, algorithm=ALGORITH),"token_type":"bearer"}
 
-@router.post("/prueba")
-async def auth_user(token: str = Depends(oauth2)):
-    print(token)
-    username = jwt.decode(token, SECRET, algorithms=ALGORITH).get("sub")
-    return username
+
 
 
         

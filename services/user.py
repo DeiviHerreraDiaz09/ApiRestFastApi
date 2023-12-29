@@ -43,17 +43,25 @@ def listar_usuario(id: str):
     else:
         return None
 
-def actualizar_usuario(user: User):    
-    usuario_dict = dict(user)
-    usuario_id = usuario_dict["id"]
-    if usuario_id:
-            actualizar = db_client.users.find_one_and_update({"_id":ObjectId(user.id)},{"$set": usuario_dict}, return_document=ReturnDocument.AFTER)
-            print(actualizar.get("id"))
-            if actualizar:
-                 return User(**user_schema(actualizar))
-            else: 
-                 return None
+def actualizar_usuario(id: str, user: User): 
+ 
+    user_db = db_client.users.find_one({"_id": ObjectId(id)})
+    
+    if user_db:
+        user_dict = user.dict()
+    
+        if "id" in user_dict:
+            del user_dict["id"]
+        if "password" in user_dict:
+            bcyp = bcrypt.hashpw(user_dict["password"].encode("utf-8"), bcrypt.gensalt())
+            user_dict["password"] = bcyp.decode("utf-8")
+        
+        actualizar = db_client.users.update_one({"_id": ObjectId(id)}, {"$set": user_dict})
+
+        return actualizar
+    
     else:
+        print("Usuario no encontrado")
         return None
 
 def borrar_usuario(id: str):
@@ -72,6 +80,8 @@ def buscarUsuario(name: str):
         return usuario_nombre
     else:
         return "No se encontró el usuario"
+
+
 
 
 
