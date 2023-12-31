@@ -9,11 +9,13 @@ from bson.objectid import ObjectId
 def producto_schema(producto) -> dict:
     return {"id": str(producto["_id"]),
             "name": producto["name"],
-            "descripcion": producto["descripcion"]}
+            "descripcion": producto["descripcion"],
+            "img": producto["img"]}
 
 # CRUD 
 
 def guardar_producto(producto: Producto):
+    
     producto_dict = dict(producto)
     del producto_dict["id"]
 

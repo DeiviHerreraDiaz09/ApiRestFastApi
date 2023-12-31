@@ -1,5 +1,6 @@
 from pydantic import BaseModel
-from models.user import User
+
+from fastapi import  File
 
 
 class Producto(BaseModel):
@@ -7,3 +8,4 @@ class Producto(BaseModel):
     name: str
     descripcion: str
     jefe: str
+    img: str 
